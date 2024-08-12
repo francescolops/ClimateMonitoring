@@ -10,6 +10,8 @@ A climate parameter monitoring system provided by monitoring centers that can ma
   * [Apache Maven 3.9.8](https://maven.apache.org/download.cgi?.)	
 
 - **Windows 10** or higher (hasn't been tested on previous versions of Windows)
+- OpenGL 3.0 compatible GPU
+- At least 800 x 600 screen resolution size
 
 ## How to Use
 This application allows registered users (**operators**), to record and add climatic parameters to the monitoring center they are employed in.
