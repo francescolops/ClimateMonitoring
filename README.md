@@ -3,7 +3,7 @@ A climate parameter monitoring system provided by monitoring centers that can ma
 
 ## Download instructions
 - To clone the repository use the following git command: `git clone https://github.com/adellafrattina/ClimateMonitoring.git`
-- After cloning the repository
+
 ### Windows
 - Make sure you have installed and  **available in PATH**:
   * [JDK 11](https://www.oracle.com/java/technologies/javase/jdk11-archive-downloads.html) or higher
@@ -15,9 +15,9 @@ A climate parameter monitoring system provided by monitoring centers that can ma
 This application allows registered users (**operators**), to record and add climatic parameters to the monitoring center they are employed in.
 Common users can search for a specific area and see the climatic detections submitted by operators.
 
-**As a common user** you can search for your area of interest in the search box that pops up after the application succesfully connects to the server, and look for any climatic info that have been submitted by operators.
+**As a common user** you can search for your area of interest in the search box that pops up after the application successfully connects to the server, and look for any climatic info that has been submitted by operators.
 
-**As an operator**, including common users' functions, you can register and be employed in a monitoring center and submit climatic parameters to the database, edit your personal information and much more.
+**As an operator**, including common users' functions, you can register and be employed in a monitoring center, submit climatic parameters to the database, edit your personal information, and much more.
 
 |                |Common User                          |Operator              |
 |----------------|-------------------------------|-----------------------------|
