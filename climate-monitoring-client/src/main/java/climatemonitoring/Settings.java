@@ -1,0 +1,6 @@
+package climatemonitoring;
+
+class Settings {
+
+	
+}
