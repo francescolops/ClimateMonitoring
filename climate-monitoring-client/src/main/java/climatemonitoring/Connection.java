@@ -2,7 +2,7 @@ package climatemonitoring;
 
 import climatemonitoring.core.ViewState;
 
-class Master extends ViewState {
+class Connection extends ViewState {
 
 	@Override
 	public void onHeadlessRender(String args) {
