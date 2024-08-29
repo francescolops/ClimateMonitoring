@@ -31,7 +31,7 @@ class ClientLayer extends Layer {
 		if (Handler.getView().getCurrentStateIndex() == ViewType.CONNECTION)
 			Handler.getView().onHeadlessRender("");
 
-		String line = Console.read(">").toLowerCase();
+		String line = Console.read("> ").toLowerCase();
 		Command c = new Command(line);
 		boolean showView = true;
 
@@ -48,14 +48,22 @@ class ClientLayer extends Layer {
 					case "center":
 						Handler.getView().setCurrentState(ViewType.CENTER_INFO);
 						break;
+					case "parameter":
+						ParameterInfo.onHeadlessRender(c.getArgs());
+						showView = false;
+						break;
 					default:
-						Console.write("Incorrect command syntax");
+						Console.write("Incorrect command syntax -->'" + c.getCmd() + "', expected [area, center, parameter]");
 						showView = false;
 						break;
 				}
 				break;
 			case CommandType.LOGIN:
 				Handler.getView().setCurrentState(ViewType.LOGIN);
+				break;
+			case CommandType.LOGOUT:
+				Handler.setLoggedOperator(null);
+				showView = false;
 				break;
 			case CommandType.REGISTER:
 				Handler.getView().setCurrentState(ViewType.REGISTRATION);
@@ -73,7 +81,7 @@ class ClientLayer extends Layer {
 						Handler.getView().setCurrentState(ViewType.PARAMETER_CREATION);
 						break;
 					default:
-						Console.write("Incorrect command syntax");
+						Console.write("Incorrect command syntax -->'" + c.getCmd() + "', expected [area, center, parameter]");
 						showView = false;
 						break;
 				}
@@ -85,9 +93,22 @@ class ClientLayer extends Layer {
 						Handler.getView().setCurrentState(ViewType.EDIT_PROFILE);
 						break;
 					default:
-						Console.write("Incorrect command syntax");
+						Console.write("Incorrect command syntax -->'" + c.getCmd() + "', expected [profile]");
 						showView = false;
 						break;
+				}
+				break;
+			case CommandType.INCLUDE:
+				c = new Command(c.getArgs());
+				switch (c.getCmd()) {
+					case "area":
+						AreaInclude.onHeadlessRender(c.getArgs());
+						showView = false;
+						break;
+					default:
+						Console.write("Incorrect command syntax -->'" + c.getCmd() + "', expected [area]");
+						showView = false;
+					break;
 				}
 				break;
 			case CommandType.SETTINGS:
@@ -112,7 +133,7 @@ class ClientLayer extends Layer {
 				showView = false;
 				break;
 			default:
-				Console.write("Unknown command");
+				Console.write("Unknown command. Type 'help' to get a command list");
 				showView = false;
 				break;
 		}
