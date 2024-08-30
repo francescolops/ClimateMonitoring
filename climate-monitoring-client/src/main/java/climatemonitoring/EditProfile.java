@@ -23,6 +23,13 @@ class EditProfile extends ViewState {
 			return;
 		}
 
+		String password = Console.read("Password for " + Handler.getLoggedOperator().getUserID() + " > ");
+		if (!password.equals(Handler.getLoggedOperator().getPassword())) {
+
+			Console.write("Invalid password");
+			return;
+		}
+
 		m_userID = Handler.getLoggedOperator().getUserID();
 		m_ssid = new String(Handler.getLoggedOperator().getSSID());
 		m_surname = Handler.getLoggedOperator().getSurname();
@@ -31,24 +38,23 @@ class EditProfile extends ViewState {
 		m_password = Handler.getLoggedOperator().getPassword();
 		m_centerID = Handler.getLoggedOperator().getCenterID();
 
-		Console.write("User ID > " + m_userID);
+		Console.write("\nUser ID > " + m_userID);
 		Console.write("SSID > " + m_ssid);
 		Console.write("Surname > " + m_surname);
 		Console.write("Name > " + m_name);
 		Console.write("Email > " + m_email);
-		Console.write("Password > " + m_password);
 		Console.write("Center ID > " + m_centerID);
 
 		String errorMsg = null;
 		do {
 
-			String answear = Console.read("Do you want to edit your profile? [Y/n]").trim().toLowerCase();
-			if (answear.equals("y"))
+			String answer = Console.read("Do you want to edit your profile? [Y/n]").trim().toLowerCase();
+			if (answer.equals("y")) 
 				errorMsg = null;
-			else if (answear.equals("n"))
+			else if (answer.equals("n"))
 				return;
 			else
-				errorMsg = "Not a valid answear";
+				errorMsg = "Not a valid answer";
 
 			if (errorMsg != null)
 				Console.write(errorMsg);
@@ -61,7 +67,7 @@ class EditProfile extends ViewState {
 
 				String newSSID = Console.read("New SSID > ");
 
-				if (newSSID != m_ssid) {
+				if (!newSSID.equals(m_ssid)) {
 
 					errorMsg = Check.ssid(m_ssid);
 					m_ssid = newSSID;
@@ -96,7 +102,7 @@ class EditProfile extends ViewState {
 
 				String newEmail = Console.read("New Email > ");
 
-				if (newEmail != m_email) {
+				if (!newEmail.equals(m_email)) {
 
 					errorMsg = Check.email(m_email);
 					m_email = newEmail;
@@ -109,8 +115,18 @@ class EditProfile extends ViewState {
 
 			do {
 
-				m_password = Console.read("New Password > ");
-				errorMsg = Check.password(m_password);
+				String oldPassword = Console.read("Old Password > ");
+
+				if (oldPassword.equals(m_password)) {
+
+					m_password = Console.read("New Password > ");
+					errorMsg = Check.password(m_password);
+				}
+
+				else {
+
+					errorMsg = "Incorrect password";
+				}
 
 				if (errorMsg != null)
 					Console.write(errorMsg);
@@ -121,7 +137,7 @@ class EditProfile extends ViewState {
 
 				String newCenterID = Console.read("New Center ID > ");
 
-				if (newCenterID != m_centerID) {
+				if (!newCenterID.equals(m_centerID)) {
 
 					errorMsg = Check.registrationCenterID(m_centerID);
 					m_centerID = newCenterID;
