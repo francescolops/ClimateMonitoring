@@ -1,4 +1,15 @@
+/*
+
+Alessandro della Frattina 753073 VA
+Cristian Capiferri 752918 VA
+Francesco Lops 753175 VA
+Dariia Sniezhko 753057 VA
+
+*/
+
 package climatemonitoring;
+
+import java.util.Random;
 
 import climatemonitoring.core.ConnectionLostException;
 import climatemonitoring.core.DatabaseRequestException;
@@ -8,8 +19,12 @@ import climatemonitoring.core.ViewState;
 import climatemonitoring.core.headless.Console;
 import climatemonitoring.core.utility.Email;
 
-import java.util.Random;
-
+/**
+ * To register into the application
+ * 
+ * @author ccapiferri
+ * @version 1.0-SNAPSHOT
+ */
 class Registration extends ViewState {
 
 	@Override
@@ -137,12 +152,12 @@ class Registration extends ViewState {
 
 		catch (DatabaseRequestException e) {
 
-			Console.write(e.getMessage());
-			onHeadlessRender("");
+			Console.write("Error message from database: " + e.getMessage());
 		}
 
 		catch (ConnectionLostException e) {
 
+			Console.write("Connection lost");
 			setCurrentState(ViewType.CONNECTION);
 		}
 	}

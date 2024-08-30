@@ -13,6 +13,12 @@ import climatemonitoring.core.ConnectionLostException;
 import climatemonitoring.core.ViewState;
 import climatemonitoring.core.headless.Console;
 
+/**
+ * To show when the client is trying to connect to a server
+ * 
+ * @author dariiasniezhkoinsubria
+ * @version 1.0-SNAPSHOT
+ */
 class Connection extends ViewState {
 
 	@Override
@@ -35,9 +41,10 @@ class Connection extends ViewState {
 			onHeadlessRender(args);
 		}
 		catch(Exception e){
+			Console.write("Unexpected error in Connection view (this should not have happened). Stack trace:");
 			e.printStackTrace();
+			System.exit(-1);
 		}
-		returnToPreviousState();
 	}
 
 	@Override

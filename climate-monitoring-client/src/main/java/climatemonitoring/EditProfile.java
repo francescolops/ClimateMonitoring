@@ -6,6 +6,12 @@ import climatemonitoring.core.Operator;
 import climatemonitoring.core.ViewState;
 import climatemonitoring.core.headless.Console;
 
+/**
+ * To edit the operator's profile
+ * 
+ * @author ccapiferri
+ * @version 1.0-SNAPSHOT
+ */
 class EditProfile extends ViewState {
 
 	@Override
@@ -134,12 +140,12 @@ class EditProfile extends ViewState {
 
 		catch (DatabaseRequestException e) {
 
-			Console.write(e.getMessage());
-			onHeadlessRender("");
+			Console.write("Error message from database: " + e.getMessage());
 		}
 
 		catch (ConnectionLostException e) {
 
+			Console.write("Connection lost");
 			setCurrentState(ViewType.CONNECTION);
 		}
 	}

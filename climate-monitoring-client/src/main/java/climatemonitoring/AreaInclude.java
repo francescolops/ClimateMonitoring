@@ -15,6 +15,12 @@ import climatemonitoring.core.ConnectionLostException;
 import climatemonitoring.core.DatabaseRequestException;
 import climatemonitoring.core.headless.Console;
 
+/**
+ * To add an existing area to the logged operator's center
+ * 
+ * @author adellafrattina
+ * @version 1.0-SNAPSHOT
+ */
 public class AreaInclude {
 
 	public static void onHeadlessRender(String args) {
@@ -46,14 +52,15 @@ public class AreaInclude {
 				return;
 			}
 
-			String errorMsg = null;
-			if ((errorMsg = Check.monitors(Handler.getLoggedOperator().getCenterID(), m_geonameID)) != null) {
+			if (Handler.getProxyServer().monitors(Handler.getLoggedOperator().getCenterID(), m_geonameID)) {
 
-				Console.write(errorMsg);
+				Console.write("This area is already monitored");
 				return;
 			}
 
 			Handler.getProxyServer().includeAreaToCenter(m_geonameID, Handler.getLoggedOperator().getCenterID());
+
+			Console.write("Area successfully included");
 		}
 
 		catch (NumberFormatException e) {
