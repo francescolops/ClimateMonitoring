@@ -10,6 +10,8 @@ Dariia Sniezhko 753057 VA
 package climatemonitoring.core.gui;
 
 import imgui.ImGui;
+import imgui.ImGuiListClipper;
+import imgui.callback.ImListClipperCallback;
 import imgui.flag.ImGuiSelectableFlags;
 
 /**
@@ -18,7 +20,7 @@ import imgui.flag.ImGuiSelectableFlags;
  * @author adellafrattina
  * @version 1.0-SNAPSHOT
  */
-public class ResultBox {
+public class ResultBox extends Widget {
 
 	/**
 	 * Initialize InputText fields
@@ -43,52 +45,33 @@ public class ResultBox {
 
 	/**
 	 * To render the result box
-	 * @param width The box width. Inputting a -1 value will fill all the available space
-	 * @param height The box height. Inputting a -1 value will fill all the available space
-	 * @param x The box x position
-	 * @param y The box y position
 	 * @return The current selected item as an array index. -1 if no item was selected
 	 */
-	public int render(float width, float height, float x, float y) {
+	public int render() {
 
 		if (m_list == null || m_list.length == 0)
 			return -1;
 
-		ImGui.setCursorPos(x, y);
-		if (ImGui.beginListBox(m_label, width, height)) {
+		ImGui.setCursorPos(getPositionX() - getOriginX(), getPositionY() - getOriginY());
 
-			for (int i = 0; i < m_list.length; i++) {
+		if (ImGui.beginListBox("##" + m_label, getWidth(), getHeight())) {
 
-				final boolean isSelected = (m_currentItem == i);
+			ImGuiListClipper.forEach(m_list.length, new ImListClipperCallback() {
 
-				if (ImGui.selectable(m_list[i], isSelected, ImGuiSelectableFlags.AllowDoubleClick))
-					m_currentItem = i;
-			}
+				@Override
+				public void accept(int index) {
+
+					final boolean isSelected = (m_currentItem == index);
+
+					if (ImGui.selectable(m_list[index], isSelected, ImGuiSelectableFlags.AllowDoubleClick))
+						m_currentItem = index;
+				}
+			});
 
 			ImGui.endListBox();
 		}
 
 		return m_currentItem;
-	}
-
-	/**
-	 * To render the result box
-	 * @param width The box width. Inputting a -1 value will fill all the available space
-	 * @param height The box height. Inputting a -1 value will fill all the available space
-	 * @return The current selected item as an array index. -1 if no item was selected
-	 */
-	public int render(float width, float height) {
-
-		return render(width, height, ImGui.getCursorPosX(), ImGui.getCursorPosY());
-	}
-
-	/**
-	 * To render the result box
-	 * @return The current selected item as an array index. -1 if no item was selected
-	 */
-	public int render() {
-
-		return render(-1, -1);
 	}
 
 	/**

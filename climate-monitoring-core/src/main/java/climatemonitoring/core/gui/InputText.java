@@ -10,8 +10,10 @@ Dariia Sniezhko 753057 VA
 package climatemonitoring.core.gui;
 
 import imgui.ImGui;
+import imgui.ImVec2;
 import imgui.type.ImString;
 import imgui.flag.ImGuiInputTextFlags;
+import imgui.flag.ImGuiKey;
 
 /**
  * The InputText class renders to screen a box to input text and holds the written string.
@@ -22,7 +24,21 @@ import imgui.flag.ImGuiInputTextFlags;
  * @author adellafrattina
  * @version 1.0-SNAPSHOT
  */
-public class InputText {
+public class InputText extends Widget {
+
+	/**
+	 * Initialize InputText fields
+	 * @param label The input text box label
+	 * @param str The string that will be rendered inside the box for the first time
+	 * @param error_msg The error message that will be shown when the {@link #showErrorMsg(boolean)} method will enable the error message rendering
+	 * @param max_chars The maximum number of characters that can be typed in the input text box
+	 */
+	public InputText(String label, String str, String error_msg, int max_chars) {
+
+		m_label = label;
+		m_string = new ImString(str, max_chars);
+		m_errorMsg = error_msg;
+	}
 
 	/**
 	 * Initialize InputText fields
@@ -33,7 +49,7 @@ public class InputText {
 	public InputText(String label, String str, String error_msg) {
 
 		m_label = label;
-		m_string = new ImString(str, ImString.DEFAULT_LENGTH);
+		m_string = new ImString(str, 1024);
 		m_errorMsg = error_msg;
 	}
 
@@ -45,7 +61,7 @@ public class InputText {
 	public InputText(String label, String str) {
 
 		m_label = label;
-		m_string = new ImString(str, ImString.DEFAULT_LENGTH);
+		m_string = new ImString(str, 1024);
 		m_errorMsg = null;
 	}
 
@@ -56,47 +72,8 @@ public class InputText {
 	public InputText(String label) {
 
 		m_label = label;
-		m_string = new ImString(ImString.DEFAULT_LENGTH);
+		m_string = new ImString(1024);
 		m_errorMsg = null;
-	}
-
-	/**
-	 * Renders to screen the input text box
-	 * @param width The box width
-	 * @param x The box x position
-	 * @param y The box y position
-	 * @return True when the user is typing by default, but if the {@link #setEnterReturnsTrue(boolean)} method set the flag to true, then the function will return true only if the user presses enter while the input text has focus
-	 */
-	public boolean render(float width, float x, float y) {
-
-		ImGui.beginDisabled(((flags & ImGuiInputTextFlags.ReadOnly) == ImGuiInputTextFlags.ReadOnly));
-
-		ImGui.pushItemWidth(width);
-		ImGui.setCursorPos(x, y);
-		ImGui.text(m_label);
-		ImGui.sameLine();
-		final boolean value = ImGui.inputText("##" + m_label, m_string, flags);
-		ImGui.popItemWidth();
-
-		if (m_showErrorMsg) {
-
-			ImGui.setCursorPosX(x);
-			ImGui.textColored(1.0f, 0.0f, 0.0f, 1.0f, m_errorMsg);
-		}
-
-		ImGui.endDisabled();
-
-		return value;
-	}
-
-	/**
-	 * Renders to screen the input text box
-	 * @param width The box width
-	 * @return True when the user is typing by default, but if the {@link #setEnterReturnsTrue(boolean)} method set the flag to true, then the function will return true only if the user presses enter while the input text has focus
-	 */
-	public boolean render(float width) {
-
-		return render(width, ImGui.getCursorPosX(), ImGui.getCursorPosY());
 	}
 
 	/**
@@ -105,7 +82,13 @@ public class InputText {
 	 */
 	public boolean render() {
 
-		return render(-1, ImGui.getCursorPosX(), ImGui.getCursorPosY());
+		begin();
+		ImGui.pushItemWidth(getWidth());
+		ImGui.setCursorPos(getPositionX() - getOriginX(), getPositionY() - getOriginY());
+		final boolean value = ImGui.inputText("##" + m_label, m_string, m_flags);
+		ImGui.popItemWidth();
+
+		return end(value);
 	}
 
 	/**
@@ -115,10 +98,10 @@ public class InputText {
 	public void setNoSpaces(boolean enable) {
 
 		if (enable)
-			flags |= ImGuiInputTextFlags.CharsNoBlank;
+			m_flags |= ImGuiInputTextFlags.CharsNoBlank;
 
 		else
-			flags &= ~ImGuiInputTextFlags.CharsNoBlank;
+			m_flags &= ~ImGuiInputTextFlags.CharsNoBlank;
 	}
 
 	/**
@@ -128,10 +111,10 @@ public class InputText {
 	public void setAlwaysUpperCase(boolean enable) {
 
 		if (enable)
-			flags |= ImGuiInputTextFlags.CharsUppercase;
+			m_flags |= ImGuiInputTextFlags.CharsUppercase;
 
 		else
-			flags &= ~ImGuiInputTextFlags.CharsUppercase;
+			m_flags &= ~ImGuiInputTextFlags.CharsUppercase;
 	}
 
 	/**
@@ -141,10 +124,10 @@ public class InputText {
 	public void setNumbersOnly(boolean enable) {
 
 		if (enable)
-			flags |= ImGuiInputTextFlags.CharsDecimal;
+			m_flags |= ImGuiInputTextFlags.CharsDecimal;
 
 		else
-			flags &= ~ImGuiInputTextFlags.CharsDecimal;
+			m_flags &= ~ImGuiInputTextFlags.CharsDecimal;
 	}
 
 	/**
@@ -154,23 +137,23 @@ public class InputText {
 	public void setReadOnly(boolean enable) {
 
 		if (enable)
-			flags |= ImGuiInputTextFlags.ReadOnly;
+			m_flags |= ImGuiInputTextFlags.ReadOnly;
 
 		else
-			flags &= ~ImGuiInputTextFlags.ReadOnly;
+			m_flags &= ~ImGuiInputTextFlags.ReadOnly;
 	}
 
 	/**
-	 * When not set, the default behavior for the {@link #render}, {@link #render(float)} and {@link #render(float, float, float)} methods is to return true when the user types. When set, it returns true only if the user presses enter when the input text box has focus
+	 * When not set, the default behavior for the {@link #render} method is to return true when the user types. When set, it returns true only if the user presses enter when the input text box has focus
 	 * @param enable True to enable, false to disable
 	 */
 	public void setEnterReturnsTrue(boolean enable) {
 
 		if (enable)
-			flags |= ImGuiInputTextFlags.EnterReturnsTrue;
+			m_flags |= ImGuiInputTextFlags.EnterReturnsTrue;
 
 		else
-			flags &= ~ImGuiInputTextFlags.EnterReturnsTrue;
+			m_flags &= ~ImGuiInputTextFlags.EnterReturnsTrue;
 	}
 
 	/**
@@ -180,10 +163,10 @@ public class InputText {
 	public void setPassword(boolean enable) {
 
 		if (enable)
-			flags |= ImGuiInputTextFlags.Password;
+			m_flags |= ImGuiInputTextFlags.Password;
 
 		else
-			flags &= ~ImGuiInputTextFlags.Password;
+			m_flags &= ~ImGuiInputTextFlags.Password;
 	}
 
 	/**
@@ -205,7 +188,7 @@ public class InputText {
 	}
 
 	/**
-	 * If the {@link #setEnterReturnsTrue(boolean)} method set the flag to true, the string will not be updated until the user presses enter in the input text box
+	 * 
 	 * @return The string inside the input text box
 	 */
 	public String getString() {
@@ -213,9 +196,60 @@ public class InputText {
 		return m_string.toString();
 	}
 
-	private ImString m_string;
-	private String m_label;
-	private int flags = 0;
-	private boolean m_showErrorMsg = false;
-	private String m_errorMsg;
+	protected void begin() {
+
+		ImGui.beginDisabled(((m_flags & ImGuiInputTextFlags.ReadOnly) == ImGuiInputTextFlags.ReadOnly));
+
+		if (m_label != null || !m_label.isEmpty()) {
+
+			ImVec2 size = ImGui.calcTextSize(m_label);
+			ImGui.setCursorPosX(getPositionX() - getOriginX() + getWidth() / 2.0f - size.x / 2.0f);
+			ImGui.text(m_label);
+		}
+
+		m_enterReturnsTrue = ((m_flags & ImGuiInputTextFlags.EnterReturnsTrue) == ImGuiInputTextFlags.EnterReturnsTrue);
+		m_flags &= ~ImGuiInputTextFlags.EnterReturnsTrue;
+	}
+
+	protected boolean end(boolean value) {
+
+		if (!ImGui.isItemFocused())
+			m_active = false;
+
+		if (ImGui.isItemActive())
+			m_active = true;
+
+		if (m_enterReturnsTrue) {
+
+			boolean b = m_active && !ImGui.isItemActive() && ImGui.isKeyPressed(ImGui.getIO().getKeyMap(ImGuiKey.Enter));
+			if (b)
+				m_active = false;
+
+			value = b;
+		}
+
+		else {
+
+			m_active = false;
+		}
+
+		if (m_showErrorMsg) {
+
+			ImVec2 size = ImGui.calcTextSize(m_errorMsg);
+			ImGui.setCursorPosX(getPositionX() + getWidth() / 2.0f - size.x / 2.0f);
+			ImGui.textColored(1.0f, 0.0f, 0.0f, 1.0f, m_errorMsg);
+		}
+
+		ImGui.endDisabled();
+
+		return value;
+	}
+
+	protected ImString m_string;
+	protected String m_label;
+	protected int m_flags = 0;
+	protected boolean m_showErrorMsg = false;
+	protected String m_errorMsg;
+	private boolean m_active = false;
+	private boolean m_enterReturnsTrue = false;
 }
