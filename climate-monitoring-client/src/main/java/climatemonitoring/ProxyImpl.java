@@ -411,6 +411,38 @@ class ProxyImpl implements Proxy{
 
 		return getcenter;
 	}
+
+	/**
+	 * To get all the available centers
+	 * 
+	 * @return All the centers as an array of centers
+	 * @throws ConnectionLostException If the client loses connection during the operation
+	 * @throws DatabaseRequestException If the database fails to process the given request
+	 */
+	@Override
+	public synchronized Center[] getCenters() throws ConnectionLostException, DatabaseRequestException {
+		
+		Center[] getcenters = null;
+
+		try {
+			out.writeObject(RequestType.GET_CENTERS);
+	
+			boolean success = (boolean) in.readObject();
+
+			if(success == true){
+				getcenters = (Center[]) in.readObject();
+			}else{
+				DatabaseRequestException e = (DatabaseRequestException) in.readObject();
+				throw e;
+			}
+			
+		} catch (IOException e) {
+			throw new ConnectionLostException();
+		} catch (ClassNotFoundException e){
+			e.printStackTrace();
+		}
+		return getcenters;
+	}
 	
 	/**
 	 * To get a center based on its address
@@ -452,6 +484,42 @@ class ProxyImpl implements Proxy{
 		}
 	
 		return center;
+	}
+
+	/**
+	 * To get the center with the most recent recording about the specified area
+	 * 
+	 * @param geoname_id The area's id
+	 * @return The latest center that submitted a recording for the given area
+	 * @throws ConnectionLostException If the client loses connection during the operation
+	 * @throws DatabaseRequestException If the database fails to process the given request
+	 */
+	@Override
+	public synchronized Center getLatestCenter(int geoname_id) throws ConnectionLostException, DatabaseRequestException {
+		
+		Center getlatestcenter = null;
+
+		try {
+
+			out.writeObject(RequestType.GET_LATEST_CENTER);
+			out.writeObject(geoname_id);
+
+			boolean success = (boolean) in.readObject();
+
+			if(success == true){
+				getlatestcenter = (Center) in.readObject();
+			}else{
+				DatabaseRequestException e = (DatabaseRequestException) in.readObject();
+				throw e;
+			}
+			
+		} catch (IOException e) {
+			throw new ConnectionLostException();
+		} catch (ClassNotFoundException e){
+			e.printStackTrace();
+		}
+
+		return getlatestcenter;
 	}
 
 	/**
@@ -592,30 +660,32 @@ class ProxyImpl implements Proxy{
 	
 		return operator;
 	}
-
+	
 	/**
-	 * Returns an array containing parameters about a specified area that
-	 * were recorded by the desired center
+	 * Returns an array containing parameters about a specified area that were recorded
+	 * by the desired center about a specific category
 	 * 
 	 * @param geoname_id The area's ID
 	 * @param center_id The center's ID
+	 * @param category The parameter's category
 	 * @return The result of the search as an array of parameters
 	 * @throws ConnectionLostException If the client loses connection during the operation
 	 * @throws DatabaseRequestException If the database fails to process the given request
 	 */
 	@Override
-	public synchronized Parameter[] getParameters(int geoname_id, String center_id) throws ConnectionLostException, DatabaseRequestException {
-		
+	public synchronized Parameter[] getParameters(int geoname_id, String center_id, String category) throws ConnectionLostException, DatabaseRequestException {
+
 		Parameter[] getparameters = null;
-		
+
 		try {
-			
-			out.writeObject(RequestType.GET_PARAMETERS_AREA_CENTER);
+
+			out.writeObject(RequestType.GET_PARAMETERS);
 			out.writeObject(geoname_id);
 			out.writeObject(center_id);
-			
+			out.writeObject(category);
+
 			boolean success = (boolean) in.readObject();
-			
+
 			if(success == true){
 				getparameters = (Parameter[]) in.readObject();
 			}else{
@@ -628,33 +698,37 @@ class ProxyImpl implements Proxy{
 		} catch (ClassNotFoundException e){
 			e.printStackTrace();
 		}
-		
+
 		return getparameters;
 	}
-	
+
 	/**
-	 * Returns an array containing parameters about a specified area from
-	 * the last center that submitted a parameter
+	 * To get the average about the score of a specific area,
+	 * of a specific center about a specific category
 	 * 
 	 * @param geoname_id The area's ID
-	 * @return The result of the search as an array of parameters
+	 * @param center_id The center's ID
+	 * @param category The parameter's category
+	 * @return The average of the scores as a double
 	 * @throws ConnectionLostException If the client loses connection during the operation
 	 * @throws DatabaseRequestException If the database fails to process the given request
 	 */
 	@Override
-	public Parameter[] getParameters(int geoname_id) throws ConnectionLostException, DatabaseRequestException {
+	public synchronized double getParametersAverage(int geoname_id, String center_id, String category) throws ConnectionLostException, DatabaseRequestException {
 
-		Parameter[] getparameters = null;
+		double getparametersaverage = 0.0;
 
 		try {
 
-			out.writeObject(RequestType.GET_PARAMETERS_AREA);
+			out.writeObject(RequestType.GET_PARAMETERS_AVERAGE);
 			out.writeObject(geoname_id);
+			out.writeObject(center_id);
+			out.writeObject(category);
 
 			boolean success = (boolean) in.readObject();
 
 			if(success == true){
-				getparameters = (Parameter[]) in.readObject();
+				getparametersaverage = (Double) in.readObject();
 			}else{
 				DatabaseRequestException e = (DatabaseRequestException) in.readObject();
 				throw e;
@@ -666,7 +740,7 @@ class ProxyImpl implements Proxy{
 			e.printStackTrace();
 		}
 
-		return getparameters;
+		return getparametersaverage;
 	}
 
 	/**
@@ -699,6 +773,44 @@ class ProxyImpl implements Proxy{
 			e.printStackTrace();
 		}
 		return getcategories;
+	}
+	
+	/**
+	 * To get the category with the most recent recording about the specified area in the specified center
+	 * 
+	 * @param geoname_id The area's ID
+	 * @param center_id The center's ID
+	 * @return The latest category of the given center for the given area
+	 * @throws ConnectionLostException If the client loses connection during the operation
+	 * @throws DatabaseRequestException If the database fails to process the given request
+	 */
+	@Override
+	public synchronized Category getLatestCategory(int geoname_id, String center_id) throws ConnectionLostException, DatabaseRequestException {
+		
+		Category getlatestcategory = null;
+
+		try {
+
+			out.writeObject(RequestType.GET_LATEST_CATEGORY);
+			out.writeObject(geoname_id);
+			out.writeObject(center_id);
+
+			boolean success = (boolean) in.readObject();
+
+			if(success == true){
+				getlatestcategory = (Category) in.readObject();
+			}else{
+				DatabaseRequestException e = (DatabaseRequestException) in.readObject();
+				throw e;
+			}
+			
+		} catch (IOException e) {
+			throw new ConnectionLostException();
+		} catch (ClassNotFoundException e){
+			e.printStackTrace();
+		}
+
+		return getlatestcategory;
 	}
 	
 	/**
@@ -878,7 +990,7 @@ class ProxyImpl implements Proxy{
 	 * @throws DatabaseRequestException If the database fails to process the given request
 	 */
 	@Override
-	public boolean includeAreaToCenter(int geoname_id, String center_id)throws ConnectionLostException, DatabaseRequestException {
+	public synchronized boolean includeAreaToCenter(int geoname_id, String center_id)throws ConnectionLostException, DatabaseRequestException {
 
 		try {
 	
@@ -913,7 +1025,7 @@ class ProxyImpl implements Proxy{
 	 * @throws DatabaseRequestException If the database fails to process the given request
 	 */
 	@Override
-	public boolean monitors(String center_id, int geoname_id) throws ConnectionLostException, DatabaseRequestException {
+	public synchronized boolean monitors(String center_id, int geoname_id) throws ConnectionLostException, DatabaseRequestException {
 
 		try {
 			
@@ -948,7 +1060,7 @@ class ProxyImpl implements Proxy{
 	 * @throws DatabaseRequestException If the database fails to process the given request
 	 */
 	@Override
-	public boolean employs(String center_id, String user_id) throws ConnectionLostException, DatabaseRequestException {
+	public synchronized boolean employs(String center_id, String user_id) throws ConnectionLostException, DatabaseRequestException {
 
 		try {
 			
@@ -1015,7 +1127,7 @@ class ProxyImpl implements Proxy{
 	 * Sends a ping request. 
 	 * @return The time (in milliseconds) elapsed between sending the ping packet and receiving it from the server
 	 */
-	public long ping() throws ConnectionLostException {
+	public synchronized long ping() throws ConnectionLostException {
 
 		try {
 
@@ -1040,5 +1152,6 @@ class ProxyImpl implements Proxy{
 	private Socket s;
 	private ObjectInputStream in;
 	private ObjectOutputStream out;
+	
 
 }
