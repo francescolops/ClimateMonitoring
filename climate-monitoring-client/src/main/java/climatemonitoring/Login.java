@@ -172,13 +172,13 @@ class Login extends ViewState {
 		}
 	}
 
-	Panel panel = new Panel();
-	InputText userid = new InputText("User ID");
-	InputTextButton password = new InputTextButton("Password");
-	boolean showpassword = true;
-	Button confirm = new Button("    Confirm Login    ");
-	Button cancel = new Button(" Cancel ");
-	Button registration = new Button(" Create new account ");
-	Result <Operator> operatorresult;
-	Text error = new Text("");
+	private Panel panel = new Panel();
+	private InputText userid = new InputText("User ID");
+	private InputTextButton password = new InputTextButton("Password");
+	private boolean showpassword = true;
+	private Button confirm = new Button("    Confirm Login    ");
+	private Button cancel = new Button(" Cancel ");
+	private Button registration = new Button(" Create new account ");
+	private Result <Operator> operatorresult;
+	private Text error = new Text("");
 }
