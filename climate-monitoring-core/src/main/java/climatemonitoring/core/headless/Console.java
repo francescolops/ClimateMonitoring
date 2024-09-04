@@ -227,7 +227,7 @@ public class Console {
 
 		try {
 
-			Process proc = Runtime.getRuntime().exec("REG ADD HKCU\\Console /v VirtualTerminalLevel /d 0x00000001 /t REG_DWORD/f");
+			Process proc = Runtime.getRuntime().exec("REG ADD HKCU /v VirtualTerminalLevel /d 0x00000001 /t REG_DWORD/f");
 			proc.waitFor();
 			if (proc.exitValue() == 0)
 				System.err.println("Failed to set command prompt as ANSI. Headless mode could be corrupted");
