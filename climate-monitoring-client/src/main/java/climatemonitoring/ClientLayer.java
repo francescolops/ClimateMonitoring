@@ -10,12 +10,15 @@ Dariia Sniezhko 753057 VA
 package climatemonitoring;
 
 import imgui.ImGui;
+import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 
 import climatemonitoring.core.Application;
 import climatemonitoring.core.ConnectionLostException;
 import climatemonitoring.core.Layer;
+import climatemonitoring.core.Result;
+import climatemonitoring.core.gui.Button;
 import climatemonitoring.core.headless.Console;
 import climatemonitoring.core.utility.Command;
 
@@ -153,14 +156,31 @@ class ClientLayer extends Layer {
 		flags |= ImGuiWindowFlags.NoBackground;
 		flags |= ImGuiWindowFlags.NoResize;
 		flags |= ImGuiWindowFlags.NoMove;
+		flags |= ImGuiWindowFlags.NoNav;
+		flags |= ImGuiWindowFlags.NoNavFocus;
+		flags |= ImGuiWindowFlags.NoNavInputs;
 		ImGui.setNextWindowSize(Application.getWidth(), Application.getHeight());
 		ImGui.setNextWindowPos(0.0f, 0.0f);
 
+		ImGui.pushStyleVar(ImGuiStyleVar.WindowBorderSize, 0.0f);
+		ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, 0.0f, 0.0f);
+		ImGui.pushStyleVar(ImGuiStyleVar.ChildBorderSize, 0.0f);
+		ImGui.begin("ClimateMonitoring", flags);
+		ImGui.setCursorPos(0.0f, 0.0f);
+		ImGui.image(Resources.getTexture(Resources.MAP).getID(), Application.getWidth(), Application.getHeight(), 0.0f, 0.0f, 1.0f, 1.0f, 0.5f, 0.5f, 0.5f, 0.4f);
+		ImGui.end();
+		ImGui.popStyleVar(3);
+
+		ImGui.setNextWindowSize(Application.getWidth(), Application.getHeight());
+		ImGui.setNextWindowPos(0.0f, 0.0f);
+
+		ImGui.begin("ClimateMonitoring", flags);
 		ImGui.pushStyleVar(ImGuiStyleVar.FrameRounding, 5.0f);
 		ImGui.pushStyleVar(ImGuiStyleVar.ChildRounding, 5.0f);
 		ImGui.pushStyleVar(ImGuiStyleVar.WindowRounding, 5.0f);
 		ImGui.pushStyleVar(ImGuiStyleVar.ScrollbarRounding, 5.0f);
-		ImGui.begin("ClimateMonitoring", flags);
+		ImGui.setCursorPos(ImGui.getStyle().getWindowPaddingX(), ImGui.getStyle().getWindowPaddingY());
+		renderSettingsButton();
 		Handler.onGUIRender();
 		ImGui.popStyleVar(4);
 		ImGui.end();
@@ -174,4 +194,53 @@ class ClientLayer extends Layer {
 			Console.write("Connection lost");
 		}
 	}
+
+	private void renderSettingsButton() {
+
+		if (Handler.getView().getCurrentStateIndex() != ViewType.CONNECTION) {
+
+			try {
+
+				if (System.currentTimeMillis() - time > 1000) {
+	
+					pingResult = Handler.getProxyServerMT().ping();
+					time = System.currentTimeMillis();
+				}
+	
+				if (pingResult != null) {
+	
+					if (pingResult.ready()) {
+	
+						ping = pingResult.get();
+					}
+				}
+			}
+	
+			catch (ConnectionLostException e) {
+	
+				Handler.getView().setCurrentState(ViewType.CONNECTION);
+			}
+	
+			catch (Exception e) {
+	
+				e.printStackTrace();
+				Application.close();
+			}
+	
+			settingsButton.setTexture(Resources.getTexture(Resources.GEAR).getID());
+			ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 0.0f, 0.0f, 0.0f);
+			ImGui.pushStyleColor(ImGuiCol.ButtonHovered, 0.2f, 0.2f, 0.2f, 0.5f);
+			ImGui.pushStyleColor(ImGuiCol.ButtonActive, 0.2f, 0.2f, 0.2f, 0.8f);
+			if (settingsButton.render())
+				Handler.getView().setCurrentState(ViewType.SETTINGS);
+			ImGui.popStyleColor(3);
+			ImGui.sameLine();
+			ImGui.text("ping: " + ping + "ms");
+		}
+	}
+
+	private Button settingsButton = new Button("##");
+	private Result<Long> pingResult;
+	long time = 0;
+	long ping = 0;
 }
