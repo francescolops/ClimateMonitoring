@@ -58,6 +58,7 @@ public class ApplicationGUI extends Application {
 		windowSpec.vSync = spec.vSync;
 
 		m_window = new Window(windowSpec);
+		GLFW.glfwSetWindowSizeLimits(m_window.getHandle(), 800, 600, GLFW.GLFW_DONT_CARE, GLFW.GLFW_DONT_CARE);
 
 		initImGui();
 		m_imGuiGlfw.init(m_window.getHandle(), true);
@@ -70,7 +71,6 @@ public class ApplicationGUI extends Application {
 	 */
 	@Override
 	public void run() {
-
 
 		while (isRunning() && !m_window.isClosed()) {
 
