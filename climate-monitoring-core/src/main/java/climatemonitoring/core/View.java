@@ -110,10 +110,10 @@ public class View {
 	 */
 	public synchronized boolean resetStateData(ViewState state) {
 
-		if (m_states.get(state.getClass().getSimpleName().toUpperCase()) == null)
+		if (m_states.get(state.getClass().getSimpleName()) == null)
 			return false;
 
-		m_states.put(state.getClass().getSimpleName().toUpperCase(), state);
+		m_states.put(state.getClass().getSimpleName(), state);
 
 		return true;
 	}
