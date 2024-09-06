@@ -49,12 +49,19 @@ public class ResultBox extends Widget {
 	 */
 	public int render() {
 
+		m_isAnyItemSelected = false;
 		if (m_list == null || m_list.length == 0)
 			return -1;
 
 		ImGui.setCursorPos(getPositionX() - getOriginX(), getPositionY() - getOriginY());
 
 		if (ImGui.beginListBox("##" + m_label, getWidth(), getHeight())) {
+
+			if (m_oldListPtr != m_list) {
+
+				ImGui.setScrollHereY(0.0f);
+				m_oldListPtr = m_list;
+			}
 
 			ImGuiListClipper.forEach(m_list.length, new ImListClipperCallback() {
 
@@ -63,8 +70,11 @@ public class ResultBox extends Widget {
 
 					final boolean isSelected = (m_currentItem == index);
 
-					if (ImGui.selectable(m_list[index], isSelected, ImGuiSelectableFlags.AllowDoubleClick))
+					if (ImGui.selectable(m_list[index], isSelected, ImGuiSelectableFlags.AllowDoubleClick)) {
+
 						m_currentItem = index;
+						m_isAnyItemSelected = true;
+					}
 				}
 			});
 
@@ -101,7 +111,18 @@ public class ResultBox extends Widget {
 		return m_currentItem;
 	}
 
+	/**
+	 * 
+	 * @return True if an item in the list has been pressed, false if not (even if it was selected previously)
+	 */
+	public boolean isAnyItemSelected() {
+
+		return m_isAnyItemSelected;
+	}
+
 	private String m_label;
 	private String[] m_list;
+	private String[] m_oldListPtr;
 	private int m_currentItem = -1;
+	private boolean m_isAnyItemSelected = false;
 }

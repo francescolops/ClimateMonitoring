@@ -12,6 +12,8 @@ package climatemonitoring.core.gui;
 import java.util.LinkedList;
 
 import imgui.ImGui;
+import imgui.ImGuiListClipper;
+import imgui.callback.ImListClipperCallback;
 import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
 
@@ -45,23 +47,37 @@ public class Table extends Widget {
 		flags |= ImGuiTableFlags.RowBg;
 		flags |= ImGuiTableFlags.SizingFixedSame;
 		flags |= ImGuiTableFlags.Resizable;
+		flags |= ImGuiTableFlags.ScrollY;
 
-		if (ImGui.beginTable(m_label, m_columns.length, flags)) {
+		boolean render = false;
+		if (m_height == DEFAULT_HEIGHT)
+			render = ImGui.beginTable(m_label, m_columns.length, flags);
+
+		else
+			render = ImGui.beginTable(m_label, m_columns.length, flags, -1, getHeight());
+
+		if (render) {
+
+			ImGui.tableSetupScrollFreeze(0, 1);
 
 			for (int i = 0; i < m_columns.length; i++)
 				ImGui.tableSetupColumn(m_columns[i], ImGuiTableColumnFlags.WidthStretch);
 
 			ImGui.tableHeadersRow();
 
-			for (int i = 0; i < m_rows.size(); i++) {
+			ImGuiListClipper.forEach(m_rows.size(), new ImListClipperCallback() {
 
-				ImGui.tableNextRow();
-				for (int j = 0; j < m_columns.length; j++) {
+				@Override
+				public void accept(int index) {
 
-					ImGui.tableSetColumnIndex(j);
-					ImGui.textWrapped(m_rows.get(i)[j]);
+					ImGui.tableNextRow();
+					for (int j = 0; j < m_columns.length; j++) {
+
+						ImGui.tableSetColumnIndex(j);
+						ImGui.textWrapped(m_rows.get(index)[j]);
+					}
 				}
-			}
+			});
 
 			ImGui.endTable();
 		}
