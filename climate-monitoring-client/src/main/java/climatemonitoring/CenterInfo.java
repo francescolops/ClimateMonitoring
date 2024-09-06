@@ -9,13 +9,18 @@ Dariia Sniezhko 753057 VA
 
 package climatemonitoring;
 
+import climatemonitoring.core.Application;
 import climatemonitoring.core.Area;
 import climatemonitoring.core.Center;
 import climatemonitoring.core.ConnectionLostException;
 import climatemonitoring.core.DatabaseRequestException;
+import climatemonitoring.core.Result;
 import climatemonitoring.core.ViewState;
+import climatemonitoring.core.gui.Button;
+import climatemonitoring.core.gui.Panel;
 import climatemonitoring.core.headless.Console;
 import climatemonitoring.core.utility.Command;
+import imgui.ImGui;
 
 /**
  * To view center info (also area inclusion if the operator is logged in GUI mode)
@@ -79,7 +84,70 @@ class CenterInfo extends ViewState {
 	@Override
 	public void onGUIRender() {
 
-		throw new UnsupportedOperationException("Unimplemented method 'onGUIRender'");
+		try {
+
+			if(centerarea == null){
+
+				centerarea = Handler.getProxyServer().getArea(center.getCity());
+			}
+			
+			panel.setSize(Application.getWidth() / 2.0f, Application.getHeight() / 2.0f);
+			panel.setOrigin(panel.getWidth() / 2.0f, panel.getHeight() / 2.0f);
+			panel.setPosition(Application.getWidth() / 2.0f, Application.getHeight() / 2.0f);
+			panel.begin(center.getCenterID());
+
+			ImGui.text("Location: " + centerarea.getName() + ", " + center.getStreet() + ", " + center.getHouseNumber() + (center.getDistrict() == null ? "": ", " + center.getDistrict()));
+			ImGui.text("Monitored areas:");
+			if(monitoredareasresult == null){
+
+				monitoredareasresult = Handler.getProxyServerMT().getMonitoredAreas(center.getCenterID());
+			}else{
+
+				if(monitoredareasresult.ready()){
+
+					monitoredareas = monitoredareasresult.get();
+				}else{
+
+					ImGui.text("Loading...");
+				}
+			}
+
+			if(monitoredareas != null){
+
+				for(int i = 0; i < monitoredareas.length; i++){
+
+					ImGui.text("- " + monitoredareas[i].getName() + ", " + monitoredareas[i].getCountryCode());
+				}
+				SearchArea.onGUIRender();
+			}
+			panel.end();
+
+			ImGui.newLine();
+			cancel.setOriginX(0);
+			cancel.setPositionX(panel.getPositionX() - panel.getWidth() / 2.0f);
+
+			if(cancel.render()){
+
+				resetStateData(new CenterInfo());
+				returnToPreviousState();
+			}
+
+			ImGui.sameLine();
+			add.setOriginX(add.getWidth());
+			add.setPositionX(panel.getPositionX() + panel.getWidth() / 2.0f);
+
+			if(add.render()){
+
+				addingmode = true;
+			}
+		} catch (ConnectionLostException e) {
+
+			setCurrentState(ViewType.CONNECTION);
+		} catch (Exception e){
+
+			e.printStackTrace();
+			Application.close();
+		}
 	}
 
 	private void printCenterInfo(Center center) throws ConnectionLostException, DatabaseRequestException {
@@ -99,4 +167,15 @@ class CenterInfo extends ViewState {
 
 		Console.write("\n");
 	}
+
+	private Panel panel = new Panel();
+	Center center;
+	private Result <Area[]> monitoredareasresult;
+	private Area[] monitoredareas;
+	private Area centerarea;
+	private Button cancel = new Button("  Cancel  ");
+	private Button add = new Button("Add new area");
+	private Panel panelinfo = new Panel();
+	private Panel paneladd = new Panel();
+	private boolean addingmode = false;
 }
