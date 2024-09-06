@@ -91,25 +91,26 @@ class CenterInfo extends ViewState {
 				centerarea = Handler.getProxyServer().getArea(center.getCity());
 			}
 			
-			panel.setSize(Application.getWidth() / 2.0f, Application.getHeight() / 2.0f);
-			panel.setOrigin(panel.getWidth() / 2.0f, panel.getHeight() / 2.0f);
-			panel.setPosition(Application.getWidth() / 2.0f, Application.getHeight() / 2.0f);
+			panel.setSize(Application.getWidth() / 1.2f, cancel.getPositionY() - ImGui.getCursorPosY() - 50);
+			panel.setOriginX(panel.getWidth() / 2.0f);
+			panel.setPositionX(Application.getWidth() / 2.0f);
 			panel.begin(center.getCenterID());
 
+			panelinfo.begin(null);
 			ImGui.text("Location: " + centerarea.getName() + ", " + center.getStreet() + ", " + center.getHouseNumber() + (center.getDistrict() == null ? "": ", " + center.getDistrict()));
 			ImGui.text("Monitored areas:");
-			if(monitoredareasresult == null){
+			if(requestdata == true){
 
 				monitoredareasresult = Handler.getProxyServerMT().getMonitoredAreas(center.getCenterID());
-			}else{
+				requestdata = false;
+			}
 
-				if(monitoredareasresult.ready()){
+			if(monitoredareasresult != null && monitoredareasresult.ready()){
 
-					monitoredareas = monitoredareasresult.get();
-				}else{
+				monitoredareas = monitoredareasresult.get();
+			}else if(monitoredareasresult != null){
 
-					ImGui.text("Loading...");
-				}
+				ImGui.text("Loading...");
 			}
 
 			if(monitoredareas != null){
@@ -118,20 +119,43 @@ class CenterInfo extends ViewState {
 
 					ImGui.text("- " + monitoredareas[i].getName() + ", " + monitoredareas[i].getCountryCode());
 				}
-				SearchArea.onGUIRender();
+				
 			}
+
+			panelinfo.end();
+
+			if(addingmode == true){
+
+				panelinfo.setHeight(ImGui.getWindowHeight() / 2.0f);
+
+				paneladd.begin("Search for the new area");
+				SearchArea.onGUIRender();
+
+				if(SearchArea.isAnyAreaSelected()){
+
+					inclusionresult = Handler.getProxyServerMT().includeAreaToCenter(SearchArea.getSelectedArea().getGeonameID(), Handler.getLoggedOperator().getCenterID());
+				}
+				
+				if(inclusionresult != null && inclusionresult.ready()){
+
+					addingmode = false;
+					inclusionresult = null;
+					requestdata = true;
+				}
+				paneladd.end();
+			}
+			
 			panel.end();
 
-			ImGui.newLine();
 			cancel.setOriginX(0);
 			cancel.setPositionX(panel.getPositionX() - panel.getWidth() / 2.0f);
-
+			
 			if(cancel.render()){
-
+				
 				resetStateData(new CenterInfo());
 				returnToPreviousState();
 			}
-
+			
 			ImGui.sameLine();
 			add.setOriginX(add.getWidth());
 			add.setPositionX(panel.getPositionX() + panel.getWidth() / 2.0f);
@@ -140,6 +164,8 @@ class CenterInfo extends ViewState {
 
 				addingmode = true;
 			}
+
+
 		} catch (ConnectionLostException e) {
 
 			setCurrentState(ViewType.CONNECTION);
@@ -178,4 +204,6 @@ class CenterInfo extends ViewState {
 	private Panel panelinfo = new Panel();
 	private Panel paneladd = new Panel();
 	private boolean addingmode = false;
+	private Result <Boolean> inclusionresult;
+	private boolean requestdata = true;
 }
